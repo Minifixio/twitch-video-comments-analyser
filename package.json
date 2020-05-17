@@ -1,0 +1,37 @@
+{
+  "name": "twitch-video-comments-analyser",
+  "version": "1.0.0",
+  "description": "Retrieve datas from Twitch video comments",
+  "main": "dist/CommentsAnalyser.js",
+  "types": "dist/CommentsAnalyser.d.ts",
+  "keywords": [
+    "twitch",
+    "analyse",
+    "twitch-comments"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Minifixio/twitch-video-comments-analyser.git"
+  },
+  "scripts": {
+    "start": "node --inspect dist/index.js",
+    "start:watch": "nodemon",
+    "build": "rimraf ./build && tsc"
+  },
+  "author": "Minifixio",
+  "license": "ISC",
+  "dependencies": {
+    "@types/request": "^2.48.5",
+    "express": "^4.17.1",
+    "request": "^2.88.2",
+    "simple-oauth2": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.1",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.1",
+    "rimraf": "^3.0.2",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.2"
+  }
+}
