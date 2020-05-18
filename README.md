@@ -1,4 +1,4 @@
-# Twitch video vomments analyser
+# Twitch video comments analyser
 
 Retreive and extract various informations from from Twitch VOD comments
 
