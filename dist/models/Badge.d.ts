@@ -1,4 +1,4 @@
 export interface Badge {
-    id: number;
+    id: string;
     version?: number;
 }

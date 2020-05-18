@@ -112,8 +112,8 @@ class CommentAnalyser {
                 message: {
                     message: com.message.body,
                     user_color: com.message.user_color ? com.message.user_color : undefined,
-                    user_badges: com.message.user_badges ? com.message.user_badges.map(ba => ({ id: +ba._id, version: ba.version ? +ba.version : undefined })) : [],
-                    emoticons: com.message.emoticons ? com.message.emoticons.map(em => ({ id: +em._id })) : []
+                    user_badges: com.message.user_badges ? com.message.user_badges.map(ba => ({ id: ba._id, version: ba.version ? +ba.version : undefined })) : [],
+                    emoticons: com.message.emoticons ? com.message.emoticons.map(em => ({ id: +em._id, link: `https://static-cdn.jtvnw.net/emoticons/v1/${em._id}/1.0` })) : []
                 },
             };
             simpleComments.push(comment);
