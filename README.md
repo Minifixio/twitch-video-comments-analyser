@@ -4,7 +4,7 @@ Retreive and extract various informations from from Twitch VOD comments
 
 Features :
 - A **simplified** and **convenient** version of Twitch video comments
-- Possibility to **choose the time range** of the video to analyse
+- Possibility to **choose the time range** of the video to analyze
 - Get datas about **emoticons** used
 - Sort comments according to the **number of comments sent by people**
 - Parse the Twitch video by time range to **highlight the moments with the most comments**
