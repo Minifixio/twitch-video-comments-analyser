@@ -6,6 +6,8 @@ export declare class CommentAnalyser {
     TWITCH_CLIENT_ID: string;
     verbose: boolean;
     constructor(twitchClientId: string, verbose?: boolean);
+    private getVideoInfos;
+    getAllComment(videoId: number): Promise<Comment[]>;
     /**
      * Get the comments from the Twitch API and return a simplified version of it
      * @param videoId The ID of the Twitch Video

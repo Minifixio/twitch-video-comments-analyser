@@ -42,6 +42,78 @@ class CommentAnalyser {
         this.TWITCH_CLIENT_ID = twitchClientId;
         this.verbose = verbose;
     }
+    getVideoInfos(videoId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const mainURL = `${this.TWITCH_API_URL}/videos/${videoId}`;
+            const options = {
+                uri: mainURL,
+                headers: {
+                    'Client-ID': this.TWITCH_CLIENT_ID
+                },
+                json: true
+            };
+            try {
+                const req = yield asyncRequest(options);
+                if (req.statusCode !== 200) {
+                    const error = req.body;
+                    throw error;
+                }
+                else {
+                    return req.body;
+                }
+            }
+            catch (e) {
+                throw e;
+            }
+        });
+    }
+    getAllComment(videoId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const path = 'videos/' + videoId;
+            const tag = 'comments?content_offset_seconds=0';
+            let mainURL = `${this.TWITCH_API_URL}/${path}/${tag}`;
+            let videoLength;
+            let nextCursor;
+            let comments = [];
+            const options = {
+                uri: mainURL,
+                headers: {
+                    'Client-ID': this.TWITCH_CLIENT_ID
+                },
+                json: true
+            };
+            try {
+                videoLength = yield (yield this.getVideoInfos(videoId)).length;
+            }
+            catch (e) {
+                throw e;
+            }
+            do {
+                try {
+                    const req = yield asyncRequest(options);
+                    const body = req.body;
+                    if (req.statusCode !== 200) {
+                        const error = req.body;
+                        throw error;
+                    }
+                    else {
+                        body._next ? nextCursor = body._next : nextCursor = null;
+                        mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${nextCursor}`;
+                        options.uri = mainURL;
+                        comments = comments.concat(body.comments);
+                        const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
+                        if (this.verbose) {
+                            progressBar((lastTime) / videoLength);
+                        }
+                    }
+                }
+                catch (e) {
+                    throw e;
+                }
+            } while (nextCursor);
+            return this.simplifyComments(comments);
+        });
+    }
     /**
      * Get the comments from the Twitch API and return a simplified version of it
      * @param videoId The ID of the Twitch Video
@@ -67,8 +139,7 @@ class CommentAnalyser {
                     const body = req.body;
                     if (req.statusCode !== 200) {
                         const error = req.body;
-                        console.error(error);
-                        return [];
+                        throw error;
                     }
                     else {
                         mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${body._next}`;
