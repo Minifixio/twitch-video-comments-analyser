@@ -14,7 +14,6 @@ Features :
 
 # Installation
 
-**NOT YET PUBLISHED**
 ```
 npm install twitch-video-comments-analyser
 ```
@@ -197,27 +196,27 @@ run().catch(error => console.log(error))
 
 ## Commenter
 - **`display_name`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The name displayed on the Twitch stream
-  - > *ex: "felix"*
+  - *ex: "felix"*
 
 - **`name`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The Twitch username of the commenter
 
 - **`display_name`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : If the commenter is a BOT or a real user
-  - > *ex: "user"*
+  - *ex: "user"*
 
 - **`bio`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The Twitch bio of the user
-  - > *ex: "don't read me"*
+  - *ex: "don't read me"*
 
 - **`logo`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : A link to the commenter's avatar
-  - > *ex: https://static-cdn.jtvnw.net/user-default-pictures-uv/dbdc9198-def8-11e9-8681-784f43822e80-profile_image-300x300.png*
+  - *ex: https://static-cdn.jtvnw.net/user-default-pictures-uv/dbdc9198-def8-11e9-8681-784f43822e80-profile_image-300x300.png*
 
 <br>
 
 ## Message
 - **`message`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The content of the comment
-  - > *ex: "hahahahhahahahhaha"*
+  - *ex: "hahahahhahahahhaha"*
 
 - **`user_color`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The color of the user in the chat (HEX)
-  - > *ex: "#8A2BE2"*
+  - *ex: "#8A2BE2"*
 
 - **`emoticons`** *Array\<[Emoticon](#emoticon)\>* 
 
@@ -227,37 +226,37 @@ run().catch(error => console.log(error))
 
 ## Emoticon
 - **`id`** *\<[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type)\>* : The ID of the comment
-  - > *ex: 1566988*
+  - *ex: 1566988*
 
 - **`link`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The link to the image of the emoticon
-  - > *ex: https://static-cdn.jtvnw.net/emoticons/v1/1566988/1.0*
+  - *ex: https://static-cdn.jtvnw.net/emoticons/v1/1566988/1.0*
 
 <br>
 
 ## Badge
 - **`id`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The ID of the badge
-  - > *ex: "vip"*
+  - *ex: "vip"*
 
 - **`version`** *\<[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type)\>* : The version of the badge
-  - > *ex: 1*
+  - *ex: 1*
 
 <br>
 
 ## UserCountComment
 - **`user`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : The name of the commenter
-  - > *ex: "nas"*
+  - *ex: "nas"*
 
 - **`count`** *\<[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type)\>* : The number of comments sent by the commenter
-  - > *ex: 23*
+  - *ex: 23*
 
 <br>
 
 ## TimeRangeComment
 - **`range`** *\<{start: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type), end: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type)}\>* : The time range of analysis (in seconds)
-  - > *ex: __{start: 278, end: 298}__ (if the time range is 20 seconds)*
+  - *ex: __{start: 278, end: 298}__ (if the time range is 20 seconds)*
 
 - **`count`** *\<[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type)\>* : The number of comments sent during this period
-  - > *ex: 109*
+  - *ex: 109*
 
 <br>
 <br>
@@ -270,7 +269,7 @@ run().catch(error => console.log(error))
 
 - **`getComments(videoId, start, end)`** *\<[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Comment](#comment)\>\>\>*
     * `videoId` : The ID of the video from Twitch
-        - > *ex: https://www.twitch.tv/videos/__619607685__*
+        - *ex: https://www.twitch.tv/videos/__619607685__*
     * `start`: The start of the extract (in seconds)
     * `end`: The end of the extract (in seconds)
 
@@ -278,7 +277,7 @@ run().catch(error => console.log(error))
 
 - **`getAllComments(videoId)`** *\<[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Comment](#comment)\>\>\>*
     * `videoId` : The ID of the video from Twitch
-        - > *ex: https://www.twitch.tv/videos/__619607685__*
+        - *ex: https://www.twitch.tv/videos/__619607685__*
 
     **Note** : The process can be a bit __long__, especially if the video is long (> 1h)
 
