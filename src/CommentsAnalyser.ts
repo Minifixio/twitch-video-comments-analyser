@@ -8,6 +8,7 @@ import { CommentsResponse } from './models/CommentsResponse';
 import { UserCountComment } from './models/UserCountComment';
 import { TimeRangeComment, Range } from './models/TimeRangeComment';
 import { EmoticonStat } from './models/EmoticonStat';
+import { VideoInfos } from './models/VideoInfos';
 
 const asyncRequest = util.promisify(request.get)
 
@@ -23,6 +24,83 @@ export class CommentAnalyser {
         }
         this.TWITCH_CLIENT_ID = twitchClientId
         this.verbose = verbose
+    }
+
+    private async getVideoInfos(videoId: number): Promise<VideoInfos> {
+        const mainURL = `${this.TWITCH_API_URL}/videos/${videoId}`;
+
+        const options = {
+            uri: mainURL,
+            headers: {
+                'Client-ID': this.TWITCH_CLIENT_ID
+            },
+            json: true
+        };
+
+        try {
+            const req = await asyncRequest(options)
+            if (req.statusCode !== 200) {
+                const error = req.body
+                throw error
+            } else {
+                return req.body
+            }
+        } catch(e) {
+            throw e
+        }
+    }
+
+    async getAllComment(videoId: number): Promise<Comment[]> {
+        const path = 'videos/' + videoId;
+        const tag = 'comments?content_offset_seconds=0';
+        let mainURL = `${this.TWITCH_API_URL}/${path}/${tag}`;
+        let videoLength: number;
+
+        let nextCursor: string | null;
+
+        let comments: RawComment[] = []
+
+        const options = {
+            uri: mainURL,
+            headers: {
+                'Client-ID': this.TWITCH_CLIENT_ID
+            },
+            json: true
+        };
+
+        try {
+            videoLength = await (await this.getVideoInfos(videoId)).length
+        } catch(e) {
+            throw e
+        }
+
+        do {
+            try {
+                const req = await asyncRequest(options)
+                const body: CommentsResponse = req.body
+
+                if (req.statusCode !== 200) {
+                    const error = req.body
+                    throw error
+                } else {
+                    body._next ? nextCursor = body._next : nextCursor = null
+
+                    mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${nextCursor}`;
+                    options.uri = mainURL
+
+                    comments = comments.concat(body.comments)
+                    const lastTime = body.comments[body.comments.length - 1].content_offset_seconds
+
+                    if (this.verbose) { progressBar((lastTime) / videoLength) }
+                }
+
+            } catch(e) {
+                throw e
+            }
+
+        } while (nextCursor)
+
+        return this.simplifyComments(comments)
     }
 
     /**
@@ -53,8 +131,7 @@ export class CommentAnalyser {
 
                 if (req.statusCode !== 200) {
                     const error = req.body
-                    console.error(error)
-                    return []
+                    throw error
                 } else {
                     mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${body._next}`;
                     options.uri = mainURL
