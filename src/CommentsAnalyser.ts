@@ -18,7 +18,7 @@ export class CommentAnalyser {
     public TWITCH_CLIENT_ID: string;
     public verbose: boolean;
 
-    constructor(twitchClientId: string, verbose: boolean = false) {
+    constructor(twitchClientId: string, verbose: boolean = true) {
         if (!twitchClientId) {
             throw Errors.NO_CLIENTID_ERROR;
         }
@@ -26,7 +26,7 @@ export class CommentAnalyser {
         this.verbose = verbose;
     }
 
-    private async getVideoInfos(videoId: number): Promise<VideoInfos> {
+    private async _getVideoInfos(videoId: number): Promise<VideoInfos> {
         const mainURL = `${this.TWITCH_API_URL}/videos/${videoId}`;
 
         const options = {
@@ -69,7 +69,7 @@ export class CommentAnalyser {
         };
 
         try {
-            videoLength = await (await this.getVideoInfos(videoId)).length;
+            videoLength = await (await this._getVideoInfos(videoId)).length;
         } catch (e) {
             throw e;
         }
@@ -91,7 +91,8 @@ export class CommentAnalyser {
                     comments = comments.concat(body.comments);
                     const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
 
-                    if (this.verbose) { progressBar((lastTime) / videoLength) }
+                    const progress = (lastTime) / videoLength
+                    if (this.verbose && progress <= 1) { _progressBar(progress) }
                 }
 
             } catch (e) {
@@ -100,7 +101,7 @@ export class CommentAnalyser {
 
         } while (nextCursor)
 
-        return this.simplifyComments(comments);
+        return this._simplifyComments(comments);
     }
 
     /**
@@ -139,7 +140,9 @@ export class CommentAnalyser {
                     comments = comments.concat(body.comments);
                     const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
                     i = lastTime;
-                    if (this.verbose) { progressBar((i - startTime) / (endTime - startTime)) }
+
+                    const progress = (i - startTime) / (endTime - startTime)
+                    if (this.verbose && progress <= 1) { _progressBar(progress) }
                 }
 
             } catch (e) {
@@ -147,14 +150,14 @@ export class CommentAnalyser {
             }
         }
         if (this.verbose) { console.log(`A total of ${comments.length} comments have been retreived from ${startTime}s to ${endTime}s`) }
-        return this.simplifyComments(comments);
+        return this._simplifyComments(comments);
     }
 
     /**
      * Make the comments simpler
      * @param comments The raw comments from Twitch
      */
-    private simplifyComments(comments: RawComment[]) {
+    private _simplifyComments(comments: RawComment[]) {
         const simpleComments: Comment[] = [];
 
         comments.forEach(com => {
@@ -186,7 +189,6 @@ export class CommentAnalyser {
             simpleComments.push(comment);
         })
 
-        if (this.verbose) { console.log('Comments have been simplified') }
         return simpleComments;
     }
 
@@ -275,7 +277,7 @@ export class CommentAnalyser {
     }
 }
 
-function progressBar(progress: number, barLen: number = 20) {
+function _progressBar(progress: number, barLen: number = 20) {
     const percentage = Math.round(progress * 100);
 
     if (percentage >= 100) {
