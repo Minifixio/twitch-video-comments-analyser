@@ -24,7 +24,7 @@ npm install twitch-video-comments-analyser
 # Usage
 
 ``` javascript
-import { CommentAnalyser } from './CommentsAnalyser' // For TypeScript
+import { CommentAnalyser } from 'twitch-video-comments-analyser' // For TypeScript
 let anaylser = require('twitch-video-comments-analyser') // For Javascript
 
 // You have to add your own Client ID. The second parameter is to enable the verbose mode.
@@ -180,13 +180,13 @@ run().catch(error => console.log(error))
 ## Comment
 
 - **`created_at`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : ISO Date 
-  - > *ex: "2020-05-12T19:30:55.704Z"*
+  - *ex: "2020-05-12T19:30:55.704Z"*
 
 - **`updated_at`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : ISO Date
-  - > *ex: "2020-05-12T19:30:55.704Z"*
+  - *ex: "2020-05-12T19:30:55.704Z"*
 
 - **`time`** *\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type)\>* : Time in seconds of the comment
-  - > *ex: 203*
+  - *ex: 203*
 
 - **`commenter`** *\<[Commenter](#commenter)\>* : The commenter
 
@@ -263,9 +263,9 @@ run().catch(error => console.log(error))
 
 # Methods
 
-- **`CommentAnalyser(TWITCH_CLIENT_ID, verbose=false)`**
+- **`CommentAnalyser(TWITCH_CLIENT_ID, verbose=true)`**
     * `TWITCH_CLIENT_ID` : your Twitch Client ID from your Twitch App. See [this](https://dev.twitch.tv/console/apps/create)
-    * `verbose`: enable the verbose mode. See [examples](#verbose-mode)
+    * `verbose`: enable the verbose mode. See [examples](#verbose-mode). Default to __true__
 
 - **`getComments(videoId, start, end)`** *\<[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Comment](#comment)\>\>\>*
     * `videoId` : The ID of the video from Twitch
