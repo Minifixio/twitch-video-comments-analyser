@@ -13,6 +13,7 @@
     "type": "git",
     "url": "https://github.com/Minifixio/twitch-video-comments-analyser.git"
   },
+  "homepage": "https://github.com/Minifixio/twitch-video-comments-analyser#readme",
   "scripts": {
     "start": "node --inspect dist/index.js",
     "start:watch": "nodemon",
@@ -23,8 +24,7 @@
   "dependencies": {
     "@types/request": "^2.48.5",
     "express": "^4.17.1",
-    "request": "^2.88.2",
-    "simple-oauth2": "^3.4.0"
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "@types/node": "^14.0.1",

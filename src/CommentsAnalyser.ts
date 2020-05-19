@@ -1,29 +1,29 @@
 import * as request from 'request';
 import * as util from 'util';
-
-import * as Errors from './models/Errors'
-import { Comment } from './models/Comment'
-import { RawComment } from './models/RawComment'
+import { Comment } from './models/Comment';
 import { CommentsResponse } from './models/CommentsResponse';
-import { UserCountComment } from './models/UserCountComment';
-import { TimeRangeComment, Range } from './models/TimeRangeComment';
 import { EmoticonStat } from './models/EmoticonStat';
+import * as Errors from './models/Errors';
+import { RawComment } from './models/RawComment';
+import { Range, TimeRangeComment } from './models/TimeRangeComment';
+import { UserCountComment } from './models/UserCountComment';
 import { VideoInfos } from './models/VideoInfos';
 
-const asyncRequest = util.promisify(request.get)
+
+const asyncRequest = util.promisify(request.get);
 
 export class CommentAnalyser {
 
-    private TWITCH_API_URL = 'https://api.twitch.tv/v5'
-    public TWITCH_CLIENT_ID: string
-    public verbose: boolean
+    private TWITCH_API_URL = 'https://api.twitch.tv/v5';
+    public TWITCH_CLIENT_ID: string;
+    public verbose: boolean;
 
     constructor(twitchClientId: string, verbose: boolean = false) {
         if (!twitchClientId) {
-            throw Errors.NO_CLIENTID_ERROR
+            throw Errors.NO_CLIENTID_ERROR;
         }
-        this.TWITCH_CLIENT_ID = twitchClientId
-        this.verbose = verbose
+        this.TWITCH_CLIENT_ID = twitchClientId;
+        this.verbose = verbose;
     }
 
     private async getVideoInfos(videoId: number): Promise<VideoInfos> {
@@ -38,15 +38,15 @@ export class CommentAnalyser {
         };
 
         try {
-            const req = await asyncRequest(options)
+            const req = await asyncRequest(options);
             if (req.statusCode !== 200) {
-                const error = req.body
-                throw error
+                const error = req.body;
+                throw error;
             } else {
-                return req.body
+                return req.body;
             }
-        } catch(e) {
-            throw e
+        } catch (e) {
+            throw e;
         }
     }
 
@@ -58,7 +58,7 @@ export class CommentAnalyser {
 
         let nextCursor: string | null;
 
-        let comments: RawComment[] = []
+        let comments: RawComment[] = [];
 
         const options = {
             uri: mainURL,
@@ -69,38 +69,38 @@ export class CommentAnalyser {
         };
 
         try {
-            videoLength = await (await this.getVideoInfos(videoId)).length
-        } catch(e) {
-            throw e
+            videoLength = await (await this.getVideoInfos(videoId)).length;
+        } catch (e) {
+            throw e;
         }
 
         do {
             try {
-                const req = await asyncRequest(options)
-                const body: CommentsResponse = req.body
+                const req = await asyncRequest(options);
+                const body: CommentsResponse = req.body;
 
                 if (req.statusCode !== 200) {
-                    const error = req.body
-                    throw error
+                    const error = req.body;
+                    throw error;
                 } else {
-                    body._next ? nextCursor = body._next : nextCursor = null
+                    body._next ? nextCursor = body._next : nextCursor = null;
 
                     mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${nextCursor}`;
-                    options.uri = mainURL
+                    options.uri = mainURL;
 
-                    comments = comments.concat(body.comments)
-                    const lastTime = body.comments[body.comments.length - 1].content_offset_seconds
+                    comments = comments.concat(body.comments);
+                    const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
 
                     if (this.verbose) { progressBar((lastTime) / videoLength) }
                 }
 
-            } catch(e) {
-                throw e
+            } catch (e) {
+                throw e;
             }
 
         } while (nextCursor)
 
-        return this.simplifyComments(comments)
+        return this.simplifyComments(comments);
     }
 
     /**
@@ -114,7 +114,7 @@ export class CommentAnalyser {
         const tag = 'comments?content_offset_seconds=' + startTime;
         let mainURL = `${this.TWITCH_API_URL}/${path}/${tag}`;
 
-        let comments: RawComment[] = []
+        let comments: RawComment[] = [];
 
         const options = {
             uri: mainURL,
@@ -124,30 +124,30 @@ export class CommentAnalyser {
             json: true
         };
 
-        for (let i=startTime; i<endTime;) {
+        for (let i = startTime; i < endTime;) {
             try {
-                const req = await asyncRequest(options)
-                const body: CommentsResponse = req.body
+                const req = await asyncRequest(options);
+                const body: CommentsResponse = req.body;
 
                 if (req.statusCode !== 200) {
-                    const error = req.body
-                    throw error
+                    const error = req.body;
+                    throw error;
                 } else {
                     mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${body._next}`;
-                    options.uri = mainURL
+                    options.uri = mainURL;
 
-                    comments = comments.concat(body.comments)
-                    const lastTime = body.comments[body.comments.length - 1].content_offset_seconds
-                    i = lastTime
+                    comments = comments.concat(body.comments);
+                    const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
+                    i = lastTime;
                     if (this.verbose) { progressBar((i - startTime) / (endTime - startTime)) }
                 }
 
-            } catch(e) {
+            } catch (e) {
                 throw e
             }
         }
         if (this.verbose) { console.log(`A total of ${comments.length} comments have been retreived from ${startTime}s to ${endTime}s`) }
-        return this.simplifyComments(comments)
+        return this.simplifyComments(comments);
     }
 
     /**
@@ -155,7 +155,7 @@ export class CommentAnalyser {
      * @param comments The raw comments from Twitch
      */
     private simplifyComments(comments: RawComment[]) {
-        const simpleComments: Comment[] = []
+        const simpleComments: Comment[] = [];
 
         comments.forEach(com => {
             const comment: Comment = {
@@ -174,20 +174,20 @@ export class CommentAnalyser {
                     user_color: com.message.user_color ? com.message.user_color : undefined,
 
                     user_badges: com.message.user_badges ? com.message.user_badges.map(ba => (
-                        {id: ba._id, version: ba.version ? +ba.version : undefined}
+                        { id: ba._id, version: ba.version ? +ba.version : undefined }
                     )) : [],
 
                     emoticons: com.message.emoticons ? com.message.emoticons.map(em => (
-                        {id: +em._id, link: `https://static-cdn.jtvnw.net/emoticons/v1/${em._id}/1.0`}
+                        { id: +em._id, link: `https://static-cdn.jtvnw.net/emoticons/v1/${em._id}/1.0` }
                     )) : []
                 },
             }
 
-            simpleComments.push(comment)
+            simpleComments.push(comment);
         })
 
         if (this.verbose) { console.log('Comments have been simplified') }
-        return simpleComments
+        return simpleComments;
     }
 
     /**
@@ -202,15 +202,15 @@ export class CommentAnalyser {
                 acc[curr.commenter.display_name] = 1;
             }
 
-            return acc
+            return acc;
         }, {})
 
         sortedComments = Object.keys(sortedComments)
-            .map(user => ({user, count: sortedComments[user]}))
+            .map(user => ({ user, count: sortedComments[user] }))
             .sort((a, b) => (a.count < b.count) ? 1 : -1);
 
         if (this.verbose) { console.log('Comments have been sorted by users') }
-        return sortedComments
+        return sortedComments;
     }
 
 
@@ -223,21 +223,21 @@ export class CommentAnalyser {
 
         let range: Range = {
             start: comments[0].time,
-            end : comments[0].time + accuracy
+            end: comments[0].time + accuracy
         }
 
         const res: TimeRangeComment[] = comments.reduce((acc: TimeRangeComment[], curr: Comment) => {
 
             if (curr.time < range.end) {
-                const idx = acc.findIndex(el => el.range.end === range.end)
-                acc[idx].count += 1
+                const idx = acc.findIndex(el => el.range.end === range.end);
+                acc[idx].count += 1;
             } else {
-                range = { start: curr.time, end: curr.time + accuracy}
-                acc.push({ range, count: 1 })
+                range = { start: curr.time, end: curr.time + accuracy };
+                acc.push({ range, count: 1 });
             }
 
-            return acc
-        }, [{ range, count: 0}])
+            return acc;
+        }, [{ range, count: 0 }]);
 
         if (this.verbose) { console.log('Comments have been sorted by time range') }
         return res
@@ -256,34 +256,34 @@ export class CommentAnalyser {
             .reduce((acc: EmoticonStat[], curr: any) => {
 
                 curr.forEach((num: number) => {
-                    const idx = acc.findIndex(el => el.emoticonId === num)
+                    const idx = acc.findIndex(el => el.emoticonId === num);
 
                     if (idx !== -1) {
-                        acc[idx].count += 1
+                        acc[idx].count += 1;
                     } else {
-                        acc.push({ emoticonId: num, count: 1, link: `https://static-cdn.jtvnw.net/emoticons/v1/${num}/1.0` })
+                        acc.push({ emoticonId: num, count: 1, link: `https://static-cdn.jtvnw.net/emoticons/v1/${num}/1.0` });
                     }
-                })
+                });
 
 
-                return acc
+                return acc;
             }, [])
-            .sort((a, b) => (a.count < b.count) ? 1 : -1)
+            .sort((a, b) => (a.count < b.count) ? 1 : -1);
 
         if (this.verbose) { console.log('Comments have been sorted by emoticons') }
-        return emoticonsArr
+        return emoticonsArr;
     }
 }
 
 function progressBar(progress: number, barLen: number = 20) {
-    const percentage = Math.round(progress * 100)
+    const percentage = Math.round(progress * 100);
 
     if (percentage >= 100) {
-        process.stdout.write(`\r [${'='.repeat(barLen)}] 100% of comments retrieved`)
-        process.stdout.write('\n')
-        console.log('Done !')
+        process.stdout.write(`\r [${'='.repeat(barLen)}] 100% of comments retrieved`);
+        process.stdout.write('\n');
+        console.log('Done !');
     } else {
-        const bar = '='.repeat(Math.round(progress * barLen)) + ' '.repeat(barLen - Math.round(progress * barLen))
-        process.stdout.write(`\r [${bar}] ${percentage}% of comments retrieved`)
+        const bar = '='.repeat(Math.round(progress * barLen)) + ' '.repeat(barLen - Math.round(progress * barLen));
+        process.stdout.write(`\r [${bar}] ${percentage}% of comments retrieved`);
     }
 }
