@@ -33,8 +33,11 @@ const anaylser = new CommentAnalyser('TWITCH_CLIENT_ID', true)
 
 const run = async () => {
 
-    // Retreive the comments and return an array of Comments (see the "patterns" section)
+    // Retreive the comments for the specified time range and return an array of Comments (see the "patterns" section)
     const comments = await anaylser.getComments(619607685, 500, 800)
+
+    // Retreive the comments for the whole video and return an array of Comments (see the "patterns" section)
+    const comments = await anaylser.getAllComment(619607685)
 
     // Return an array with the ID of each emoticon used and its number of occurences
     const emoticonsDatas = anaylser.emoticonStats(comments)
@@ -58,6 +61,7 @@ run().catch(error => console.log(error))
 # Examples :
 ``` javascript
     let comments = await anaylser.getComments(619607685, 500, 800)
+    // or the same result : comments = await anaylser.getCommentsAll(619607685)
     console.log(comments)
     
     /** Returns :
@@ -265,12 +269,18 @@ run().catch(error => console.log(error))
     * `verbose`: enable the verbose mode. See [examples](#verbose-mode)
 
 - **`getComments(videoId, start, end)`** *\<[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Comment](#comment)\>\>\>*
-    * `videoId` : The ID od the video from Twitch
+    * `videoId` : The ID of the video from Twitch
         - > *ex: https://www.twitch.tv/videos/__619607685__*
     * `start`: The start of the extract (in seconds)
     * `end`: The end of the extract (in seconds)
 
-    **Note** : If the time range is large, the process can be __long__
+    **Note** : If the time range is large, the process can be a bit __long__
+
+- **`getAllComments(videoId)`** *\<[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Comment](#comment)\>\>\>*
+    * `videoId` : The ID of the video from Twitch
+        - > *ex: https://www.twitch.tv/videos/__619607685__*
+
+    **Note** : The process can be a bit __long__, especially if the video is long (> 1h)
 
 - **`sortByUsers(comments)`** *\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[UserCountComment](#usercountcomment)\>\>* in ascending order
     * `comment` : The array of comments from the `getComments()` method
@@ -285,6 +295,9 @@ run().catch(error => console.log(error))
 
 Verbose mode adds some logs and also a progress bar in the console showing the progress in retrieving comments.
 
-> ex : [======&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] 50% of comments retrieved
+example : 
+```
+[======         ] 50% of comments retrieved
+```
 
 
