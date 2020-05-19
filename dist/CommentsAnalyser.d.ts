@@ -1,12 +1,12 @@
 import { Comment } from './models/Comment';
-import { UserCountComment } from './models/UserCountComment';
 import { TimeRangeComment } from './models/TimeRangeComment';
+import { UserCountComment } from './models/UserCountComment';
 export declare class CommentAnalyser {
     private TWITCH_API_URL;
     TWITCH_CLIENT_ID: string;
     verbose: boolean;
     constructor(twitchClientId: string, verbose?: boolean);
-    private getVideoInfos;
+    private _getVideoInfos;
     getAllComment(videoId: number): Promise<Comment[]>;
     /**
      * Get the comments from the Twitch API and return a simplified version of it
@@ -19,7 +19,7 @@ export declare class CommentAnalyser {
      * Make the comments simpler
      * @param comments The raw comments from Twitch
      */
-    private simplifyComments;
+    private _simplifyComments;
     /**
      * Sort comments according to the number of comments sent by people
      * @param comments

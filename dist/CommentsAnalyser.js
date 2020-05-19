@@ -34,7 +34,7 @@ const util = __importStar(require("util"));
 const Errors = __importStar(require("./models/Errors"));
 const asyncRequest = util.promisify(request.get);
 class CommentAnalyser {
-    constructor(twitchClientId, verbose = false) {
+    constructor(twitchClientId, verbose = true) {
         this.TWITCH_API_URL = 'https://api.twitch.tv/v5';
         if (!twitchClientId) {
             throw Errors.NO_CLIENTID_ERROR;
@@ -42,7 +42,7 @@ class CommentAnalyser {
         this.TWITCH_CLIENT_ID = twitchClientId;
         this.verbose = verbose;
     }
-    getVideoInfos(videoId) {
+    _getVideoInfos(videoId) {
         return __awaiter(this, void 0, void 0, function* () {
             const mainURL = `${this.TWITCH_API_URL}/videos/${videoId}`;
             const options = {
@@ -83,7 +83,7 @@ class CommentAnalyser {
                 json: true
             };
             try {
-                videoLength = yield (yield this.getVideoInfos(videoId)).length;
+                videoLength = yield (yield this._getVideoInfos(videoId)).length;
             }
             catch (e) {
                 throw e;
@@ -102,8 +102,9 @@ class CommentAnalyser {
                         options.uri = mainURL;
                         comments = comments.concat(body.comments);
                         const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
-                        if (this.verbose) {
-                            progressBar((lastTime) / videoLength);
+                        const progress = (lastTime) / videoLength;
+                        if (this.verbose && progress <= 1) {
+                            _progressBar(progress);
                         }
                     }
                 }
@@ -111,7 +112,7 @@ class CommentAnalyser {
                     throw e;
                 }
             } while (nextCursor);
-            return this.simplifyComments(comments);
+            return this._simplifyComments(comments);
         });
     }
     /**
@@ -147,8 +148,9 @@ class CommentAnalyser {
                         comments = comments.concat(body.comments);
                         const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
                         i = lastTime;
-                        if (this.verbose) {
-                            progressBar((i - startTime) / (endTime - startTime));
+                        const progress = (i - startTime) / (endTime - startTime);
+                        if (this.verbose && progress <= 1) {
+                            _progressBar(progress);
                         }
                     }
                 }
@@ -159,14 +161,14 @@ class CommentAnalyser {
             if (this.verbose) {
                 console.log(`A total of ${comments.length} comments have been retreived from ${startTime}s to ${endTime}s`);
             }
-            return this.simplifyComments(comments);
+            return this._simplifyComments(comments);
         });
     }
     /**
      * Make the comments simpler
      * @param comments The raw comments from Twitch
      */
-    simplifyComments(comments) {
+    _simplifyComments(comments) {
         const simpleComments = [];
         comments.forEach(com => {
             const comment = {
@@ -189,9 +191,6 @@ class CommentAnalyser {
             };
             simpleComments.push(comment);
         });
-        if (this.verbose) {
-            console.log('Comments have been simplified');
-        }
         return simpleComments;
     }
     /**
@@ -271,7 +270,7 @@ class CommentAnalyser {
     }
 }
 exports.CommentAnalyser = CommentAnalyser;
-function progressBar(progress, barLen = 20) {
+function _progressBar(progress, barLen = 20) {
     const percentage = Math.round(progress * 100);
     if (percentage >= 100) {
         process.stdout.write(`\r [${'='.repeat(barLen)}] 100% of comments retrieved`);
