@@ -1,16 +1,13 @@
-import * as request from 'request';
-import * as util from 'util';
+import * as fetch from 'node-fetch';
+import * as Errors from './models/Errors';
 import { Comment } from './models/Comment';
 import { CommentsResponse } from './models/CommentsResponse';
 import { EmoticonStat } from './models/EmoticonStat';
-import * as Errors from './models/Errors';
 import { RawComment } from './models/RawComment';
 import { Range, TimeRangeComment } from './models/TimeRangeComment';
 import { UserCountComment } from './models/UserCountComment';
 import { VideoInfos } from './models/VideoInfos';
-
-
-const asyncRequest = util.promisify(request.get);
+import { ProgressBar } from './ProgressBar';
 
 export class CommentAnalyser {
 
@@ -28,22 +25,16 @@ export class CommentAnalyser {
 
     private async _getVideoInfos(videoId: number): Promise<VideoInfos> {
         const mainURL = `${this.TWITCH_API_URL}/videos/${videoId}`;
-
-        const options = {
-            uri: mainURL,
-            headers: {
-                'Client-ID': this.TWITCH_CLIENT_ID
-            },
-            json: true
-        };
+        const headers = { 'Client-ID': this.TWITCH_CLIENT_ID };
 
         try {
-            const req = await asyncRequest(options);
-            if (req.statusCode !== 200) {
-                const error = req.body;
-                throw error;
+            const res = await fetch.default(mainURL, { headers })
+            const body = await res.json()
+
+            if (res.status !== 200) {
+                throw body;
             } else {
-                return req.body;
+                return body;
             }
         } catch (e) {
             throw e;
@@ -51,55 +42,52 @@ export class CommentAnalyser {
     }
 
     async getAllComment(videoId: number): Promise<Comment[]> {
-        const path = 'videos/' + videoId;
-        const tag = 'comments?content_offset_seconds=0';
-        let mainURL = `${this.TWITCH_API_URL}/${path}/${tag}`;
+        let mainURL = `${this.TWITCH_API_URL}/videos/${videoId}/comments?content_offset_seconds=0`;
         let videoLength: number;
-
         let nextCursor: string | null;
-
         let comments: RawComment[] = [];
-
-        const options = {
-            uri: mainURL,
-            headers: {
-                'Client-ID': this.TWITCH_CLIENT_ID
-            },
-            json: true
-        };
+        const headers = { 'Client-ID': this.TWITCH_CLIENT_ID };
+        const progressBar = new ProgressBar(videoId);
 
         try {
             videoLength = await (await this._getVideoInfos(videoId)).length;
         } catch (e) {
-            throw e;
+            console.error('An error occurred while retrieving Twitch comments :', e)
+            return []
         }
 
         do {
             try {
-                const req = await asyncRequest(options);
-                const body: CommentsResponse = req.body;
+                const res = await fetch.default(mainURL, { headers })
+                const body: CommentsResponse = await res.json();
 
-                if (req.statusCode !== 200) {
-                    const error = req.body;
-                    throw error;
+                if (res.status !== 200) {
+                    console.error('An error occurred while retrieving Twitch comments :', body)
+                    return []
                 } else {
                     body._next ? nextCursor = body._next : nextCursor = null;
 
-                    mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${nextCursor}`;
-                    options.uri = mainURL;
+                    mainURL = `${this.TWITCH_API_URL}/videos/${videoId}/comments?cursor=${nextCursor}`;
 
                     comments = comments.concat(body.comments);
                     const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
 
                     const progress = (lastTime) / videoLength
-                    if (this.verbose && progress <= 1) { _progressBar(progress) }
+                    if (this.verbose && progress <= 1) { progressBar.update(progress) }
                 }
 
             } catch (e) {
-                throw e;
+                if (this.verbose) { progressBar.erase() }
+                console.error('An error occurred while retrieving Twitch comments :', e)
+                return []
             }
 
         } while (nextCursor)
+
+        if (this.verbose) {
+            progressBar.finish()
+            console.log(`A total of ${comments.length} comments have been retreived for video ${videoId}`);
+        }
 
         return this._simplifyComments(comments);
     }
@@ -111,45 +99,43 @@ export class CommentAnalyser {
      * @param endTime The end of the extract you want to analyze in seconds
      */
     async getComments(videoId: number, startTime: number, endTime: number): Promise<Comment[]> {
-        const path = 'videos/' + videoId;
-        const tag = 'comments?content_offset_seconds=' + startTime;
-        let mainURL = `${this.TWITCH_API_URL}/${path}/${tag}`;
-
+        let mainURL = `${this.TWITCH_API_URL}/videos/${videoId}/comments?content_offset_seconds=${startTime}`;
         let comments: RawComment[] = [];
-
-        const options = {
-            uri: mainURL,
-            headers: {
-                'Client-ID': this.TWITCH_CLIENT_ID
-            },
-            json: true
-        };
+        const headers = { 'Client-ID': this.TWITCH_CLIENT_ID };
+        const progressBar = new ProgressBar(videoId);
 
         for (let i = startTime; i < endTime;) {
             try {
-                const req = await asyncRequest(options);
-                const body: CommentsResponse = req.body;
+                const res = await fetch.default(mainURL, { headers })
+                const body: CommentsResponse = await res.json();
 
-                if (req.statusCode !== 200) {
-                    const error = req.body;
-                    throw error;
+                if (res.status !== 200) {
+                    console.error('An error occurred while retrieving Twitch comments :', body)
+                    return []
                 } else {
-                    mainURL = `${this.TWITCH_API_URL}/${path}/comments?cursor=${body._next}`;
-                    options.uri = mainURL;
+                    mainURL = `${this.TWITCH_API_URL}/videos/${videoId}/comments?cursor=${body._next}`;
 
                     comments = comments.concat(body.comments);
                     const lastTime = body.comments[body.comments.length - 1].content_offset_seconds;
+
                     i = lastTime;
 
-                    const progress = (i - startTime) / (endTime - startTime)
-                    if (this.verbose && progress <= 1) { _progressBar(progress) }
+                    const progress = (lastTime - startTime) / (endTime - startTime)
+                    if (this.verbose && progress <= 1) { progressBar.update(progress) }
                 }
 
             } catch (e) {
-                throw e
+                if (this.verbose) { progressBar.erase() }
+                console.error('An error occurred while retrieving Twitch comments :', e)
+                return []
             }
         }
-        if (this.verbose) { console.log(`A total of ${comments.length} comments have been retreived from ${startTime}s to ${endTime}s`) }
+
+        if (this.verbose) {
+            progressBar.finish()
+            console.log(`A total of ${comments.length} comments have been retreived from ${startTime}s to ${endTime}s`);
+        }
+
         return this._simplifyComments(comments);
     }
 
@@ -197,6 +183,12 @@ export class CommentAnalyser {
      * @param comments
      */
     sortByUsers(comments: Comment[]): UserCountComment[] {
+
+        if (comments.length === 0) {
+            if(this.verbose) {console.log('No comments were provided for sortByUsers()') }
+            return []
+        }
+
         let sortedComments = comments.reduce((acc: any, curr) => {
             if (acc[curr.commenter.display_name]) {
                 acc[curr.commenter.display_name] += 1;
@@ -211,7 +203,7 @@ export class CommentAnalyser {
             .map(user => ({ user, count: sortedComments[user] }))
             .sort((a, b) => (a.count < b.count) ? 1 : -1);
 
-        if (this.verbose) { console.log('Comments have been sorted by users') }
+        if (this.verbose && sortedComments.length > 0) { console.log('Comments have been sorted by users') }
         return sortedComments;
     }
 
@@ -223,12 +215,17 @@ export class CommentAnalyser {
      */
     sortByTimeRange(comments: Comment[], accuracy: number) {
 
+        if (comments.length === 0) {
+            if(this.verbose) {console.log('No comments were provided for sortByTimeRange()') }
+            return []
+        }
+
         let range: Range = {
             start: comments[0].time,
             end: comments[0].time + accuracy
         }
 
-        const res: TimeRangeComment[] = comments.reduce((acc: TimeRangeComment[], curr: Comment) => {
+        const sortedComments: TimeRangeComment[] = comments.reduce((acc: TimeRangeComment[], curr: Comment) => {
 
             if (curr.time < range.end) {
                 const idx = acc.findIndex(el => el.range.end === range.end);
@@ -241,8 +238,8 @@ export class CommentAnalyser {
             return acc;
         }, [{ range, count: 0 }]);
 
-        if (this.verbose) { console.log('Comments have been sorted by time range') }
-        return res
+        if (this.verbose && sortedComments.length > 0) { console.log('Comments have been sorted by time range') }
+        return sortedComments
     }
 
 
@@ -252,6 +249,12 @@ export class CommentAnalyser {
      * @param accuracy the time range (in seconds)
      */
     emoticonStats(comments: Comment[]): any[] {
+
+        if (comments.length === 0) {
+            if(this.verbose) {console.log('No comments were provided for emoticonStats()') }
+            return []
+        }
+
         const emoticonsArr = comments
             .filter(com => com.message.emoticons.length > 0)
             .map(com => (com.message.emoticons?.map(em => (em.id))))
@@ -274,18 +277,5 @@ export class CommentAnalyser {
 
         if (this.verbose) { console.log('Comments have been sorted by emoticons') }
         return emoticonsArr;
-    }
-}
-
-function _progressBar(progress: number, barLen: number = 20) {
-    const percentage = Math.round(progress * 100);
-
-    if (percentage >= 100) {
-        process.stdout.write(`\r [${'='.repeat(barLen)}] 100% of comments retrieved`);
-        process.stdout.write('\n');
-        console.log('Done !');
-    } else {
-        const bar = '='.repeat(Math.round(progress * barLen)) + ' '.repeat(barLen - Math.round(progress * barLen));
-        process.stdout.write(`\r [${bar}] ${percentage}% of comments retrieved`);
     }
 }
