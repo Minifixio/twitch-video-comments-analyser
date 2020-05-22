@@ -1,12 +1,12 @@
 {
   "name": "twitch-video-comments-analyser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Retrieve datas from Twitch video comments",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "keywords": [
     "twitch",
-    "analyse",
+    "analyze",
     "twitch-comments"
   ],
   "repository": {
