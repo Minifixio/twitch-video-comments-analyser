@@ -283,7 +283,7 @@ run().catch(error => console.log(error))
     * `videoId` : The ID of the video from Twitch
         - *ex: https://www.twitch.tv/videos/__619607685__*
 
-    **Note** : The process can be a bit __long__, especially if the video is long (> 1h)
+    **Note** : The process can be a bit __long__, especially if the video is long
 
 - **`sortByUsers(comments)`** *\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[UserCountComment](#usercountcomment)\>\>* in ascending order
     * `comment` : The array of comments from the `getComments()` method
