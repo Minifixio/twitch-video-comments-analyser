@@ -18,6 +18,7 @@ Features :
 ```
 npm install twitch-video-comments-analyser
 ```
+[![NPM](https://nodei.co/npm/twitch-video-comments-analyser.png)](https://nodei.co/npm/twitch-video-comments-analyser/)
 
 <br>
 <br>
