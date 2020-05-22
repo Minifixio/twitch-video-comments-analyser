@@ -1,2 +1,6 @@
 /src/api_auth_v2.js
 node_modules
+/src/tests.ts
+/dist/tests.js
+/dist/tests.js.map
+/dist/tests.d.ts

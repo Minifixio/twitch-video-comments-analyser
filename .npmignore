@@ -1,1 +1,4 @@
-/dist
+/dist/tests.js
+/dist/tests.js.map
+/dist/tests.d.ts
+/src/tests.ts
