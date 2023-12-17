@@ -1,7 +1,5 @@
 # Twitch video comments analyser
 ![NPM](https://img.shields.io/npm/v/twitch-video-comments-analyser?style=for-the-badge)
-![David](https://img.shields.io/david/dev/minifixio/twitch-video-comments-analyser?style=for-the-badge)
-![David](https://img.shields.io/david/minifixio/twitch-video-comments-analyser?style=for-the-badge)
 
 Retreive and extract various informations from from Twitch VOD comments
 
